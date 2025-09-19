@@ -38,6 +38,7 @@ dependencies:
   # Add Firebase Core dependency
   firebase_core: ^3.9.0
   get: ^4.7.2
+  firebase_auth: ^5.7.0
 
 dev_dependencies:
   flutter_test:
