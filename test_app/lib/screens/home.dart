@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:test_app/screens/product_detail.dart';
 
 class HomeActivity extends StatelessWidget {
   const HomeActivity({super.key});
@@ -77,6 +78,10 @@ class HomeActivity extends StatelessWidget {
                             trailing: Text(
                               snapshot.data!.docs[index]['price'].toString(),
                             ),
+                            onTap: () {
+                              final docId = snapshot.data!.docs[index].id;
+                              Get.to(() => ProductDetailScreen(docId: docId));
+                            },
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(
