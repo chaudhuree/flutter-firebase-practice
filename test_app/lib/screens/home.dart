@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,21 +13,42 @@ class HomeActivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Product Lists')),
+      appBar: AppBar(
+        title: Text('Product Lists'),
+        automaticallyImplyLeading: false,
+      ),
       body: SingleChildScrollView(
         // Make the body scrollable
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Get.toNamed('/add'); // Navigate to the '/add' route
-                  },
-                  child: Text('Add Product'),
-                ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      Get.toNamed('/add'); // Navigate to the '/add' route
+                    },
+                    child: Text('Add Product'),
+                  ),
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+                      Get.toNamed('/');
+                    },
+                    child: Text('Logout'),
+                  ),
+                ],
               ),
             ),
             // ListView with separators
