@@ -1,14 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class HomeActivity extends StatelessWidget {
-  HomeActivity({super.key});
-  final List<Map<String, String>> products = [
-    {'name': 'Product 1', 'price': '10.0'},
-    {'name': 'Product 2', 'price': '20.0'},
-    {'name': 'Product 3', 'price': '30.0'},
-  ];
+  const HomeActivity({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +15,7 @@ class HomeActivity extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
-        // Make the body scrollable
+        scrollDirection: Axis.vertical,
         child: Column(
           children: [
             Padding(
@@ -44,39 +41,61 @@ class HomeActivity extends StatelessWidget {
                     ),
                     onPressed: () {
                       FirebaseAuth.instance.signOut();
-                      Get.toNamed('/');
+                      Get.toNamed('/'); // Navigate back to the login page
                     },
                     child: Text('Logout'),
                   ),
                 ],
               ),
             ),
-            // ListView with separators
-            ListView.separated(
-              shrinkWrap:
-                  true, // Ensures the ListView takes only the needed space
-              physics:
-                  NeverScrollableScrollPhysics(), // Disables scrolling on ListView (handled by SingleChildScrollView)
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(products[index]['name']!),
-                  subtitle: Text(products[index]['price']!),
-                );
-              },
-              separatorBuilder: (context, index) {
-                return Row(
-                  children: [
-                    SizedBox(width: 20),
-                    Container(
-                      width: 200, // thickness of the vertical stick
-                      height: 2, // height of the vertical stick
-                      color: Colors.grey, // stick color
-                    ),
-                    Expanded(
-                      child: Container(),
-                    ), // This will push the stick to the left
-                  ],
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('products')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('No data found'));
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Something went wrong'));
+                }
+                return ListView.builder(
+                  shrinkWrap: true, // Prevent ListView from taking full height
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: Text(snapshot.data!.docs[index]['name']),
+                            subtitle: Text(
+                              snapshot.data!.docs[index]['description'],
+                            ),
+                            trailing: Text(
+                              snapshot.data!.docs[index]['price'].toString(),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                DateFormat('d MMM, h:mm a').format(
+                                  snapshot.data!.docs[index]['date'].toDate(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
               },
             ),
