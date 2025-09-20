@@ -67,37 +67,52 @@ class HomeActivity extends StatelessWidget {
                   shrinkWrap: true, // Prevent ListView from taking full height
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
-                    return Card(
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: Text(snapshot.data!.docs[index]['name']),
-                            subtitle: Text(
-                              snapshot.data!.docs[index]['description'],
+                    return Dismissible(
+                      key: Key(snapshot.data!.docs[index].id),
+                      onDismissed: (direction) {
+                        if (direction == DismissDirection.endToStart) {
+                          FirebaseFirestore.instance
+                              .collection('products')
+                              .doc(snapshot.data!.docs[index].id)
+                              .delete();
+                        }
+                      },
+                      background: Container(
+                        color: Colors.red,
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      child: Card(
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: Text(snapshot.data!.docs[index]['name']),
+                              subtitle: Text(
+                                snapshot.data!.docs[index]['description'],
+                              ),
+                              trailing: Text(
+                                snapshot.data!.docs[index]['price'].toString(),
+                              ),
+                              onTap: () {
+                                final docId = snapshot.data!.docs[index].id;
+                                Get.to(() => ProductDetailScreen(docId: docId));
+                              },
                             ),
-                            trailing: Text(
-                              snapshot.data!.docs[index]['price'].toString(),
-                            ),
-                            onTap: () {
-                              final docId = snapshot.data!.docs[index].id;
-                              Get.to(() => ProductDetailScreen(docId: docId));
-                            },
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                DateFormat('d MMM, h:mm a').format(
-                                  snapshot.data!.docs[index]['date'].toDate(),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  DateFormat('d MMM, h:mm a').format(
+                                    snapshot.data!.docs[index]['date'].toDate(),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   },
